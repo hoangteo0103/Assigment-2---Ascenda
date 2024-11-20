@@ -17,7 +17,6 @@ The structure of the project is outlined below, providing a clear view of the ma
 │ ├── config.py # Load amenities_config and supplier_config from json file to use in code.
 │ ├── suppliers_config.json # Configuration for hotel data suppliers.
 ├── src/ # Source code for the project.
-│ ├── utils.py # Contain parsing functions for amenities, images, complex fields.
 │ ├── **init**.py # Makes src a Python package.
 │ ├── data_integration/ # Components responsible for data fetching and integration.
 │ │ ├── acme_supplier.py # Integration logic specific to the Acme supplier.
@@ -27,6 +26,7 @@ The structure of the project is outlined below, providing a clear view of the ma
 │ │ ├── patagonia_supplier.py # Integration logic for the Patagonia supplier.
 │ │ ├── supplier_manager.py # Manages fetching and merging of data from suppliers.
 │ │ ├── **init**.py # Makes data_integration a Python package.
+├ │ ├── parser.py # Contain parsing functions for amenities, images, complex fields.
 │ ├── models/ # Data models used in the project.
 │ │ ├── hotel.py # Defines the data class for hotel.
 │ │ ├── **init**.py # Makes models a Python package.
@@ -64,9 +64,7 @@ The project utilizes a BaseSupplier class to standardize and simplify the data f
 ###### Core Functionality(data_integration/base_supplier.py):
 
 - Endpoint Configuration: The **supplier_key** unique to each supplier subclass is used to access its specific configuration in the suppliers_config.json. This includes the API endpoint and the necessary field mappings to parse the JSON data correctly.
-
 - Fetching Data: The **fetch()** method in BaseSupplier manages API requests to the supplier’s endpoint. It handles HTTP responses and errors uniformly across different suppliers.
-
 - Generic Parsing Logic: The parse() method, implemented in the BaseSupplier, uses the configurations loaded based on the **supplier_key** to dynamically parse the JSON response into a structured Hotel object. It leverages helper functions like **parse_generic_field()**, **parse_amenities()**, and **parse_images()** to handle specific segments of the data according to the mappings defined in the configuration.
 
 The application employs a modular approach to parse data fetched from different hotel suppliers. Each supplier's data format is mapped using a flexible configuration strategy, ensuring easy adaptation to changes in supplier data structures without modifying the core parsing logic. All the parsing logic is in **utils.py**
@@ -74,11 +72,8 @@ The application employs a modular approach to parse data fetched from different 
 #### Key Functions in the Parsing Process:
 
 - **parse(self, dto) -> Hotel**: This method interprets the raw data object (dto) from each supplier according to the mappings defined in suppliers_config.json. It utilizes helper functions to handle specific data segments such as location, amenities, and images.
-
 - **parse_generic_field(data, field_config)**: This function extracts and processes complex nested data structures based on a provided configuration. It allows for detailed nested mappings like those used for the location fields.
-
 - **parse_amenities(amenities)**: Specialized to categorize amenities into 'general' and 'room' based on predefined lists (GENERAL_AMENITIES, ROOM_AMENITIES). This ensures consistent categorization across different suppliers who might have disparate ways of listing amenities.
-
 - **parse_images(image_data, config)**: Handles the parsing of image data, ensuring that images are categorized into 'rooms', 'site', and 'amenities' as per the configurations. This method standardizes the image data structure which can vary significantly between suppliers.
 
 ## 3. Merging Strategy for Hotel Data
@@ -93,11 +88,7 @@ The data merging process is implemented in the data_merger.py module, where mult
 
 - **Name**: Get the longest length string to use as a unique name.
 - **Description**: Concatenates descriptions from all sources to provide a comprehensive narrative. This ensures that no descriptive information is lost and that potential guests receive a full understanding of what the hotel offers.
-
 - **Location**: Merges location information by preferring the most complete and detailed entry. If one source provides more detailed geographic coordinates or address information(longer length), that detail is retained in the merged record.
-
 - **Amenities**: Combines amenities listed by all sources, deduplicating them to avoid repetition. This approach ensures that all unique amenities are represented without clutter.
-
 - **Images**: Merges images by ensuring that duplicates (based on the image URL) are removed. This maintains a diverse visual representation of the hotel without redundancy.
-
 - **Booking Conditions**: Consolidates all unique booking conditions provided by different sources to give a complete set of policies.
