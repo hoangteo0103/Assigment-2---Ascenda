@@ -1,0 +1,37 @@
+{
+  "fields": {
+    "id": { "strategy": "first_non_null" },
+    "destination_id": { "strategy": "first_non_null" },
+    "name": { "strategy": "choose_best" },
+    "description": { "strategy": "concatenate" },
+    "location.lat": { "strategy": "first_non_null" },
+    "location.lng": { "strategy": "first_non_null" },
+    "location.address": { "strategy": "choose_best" },
+    "location.city": { "strategy": "choose_best" },
+    "location.country": { "strategy": "first_non_null" },
+    "amenities.general": { "strategy": "merge_list" },
+    "amenities.room": { "strategy": "merge_list" },
+    "images.rooms": {
+      "strategy": "merge_list",
+      "key": "link",
+      "subfield_strategies": {
+        "description": "concatenate"
+      }
+    },
+    "images.site": {
+      "strategy": "merge_list",
+      "key": "link",
+      "subfield_strategies": {
+        "description": "concatenate"
+      }
+    },
+    "images.amenities": {
+      "strategy": "merge_list",
+      "key": "link",
+      "subfield_strategies": {
+        "description": "concatenate"
+      }
+    },
+    "booking_conditions": { "strategy": "merge_list" }
+  }
+}

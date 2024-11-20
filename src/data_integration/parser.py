@@ -1,99 +1,138 @@
-from ..models.hotel import Image, ImageCategory, Amenities
-from typing import List, Dict
-from config.config import GENERAL_AMENITIES, ROOM_AMENITIES
-
 class Parser:
     @staticmethod
-    def parse_amenities(amenities):
+    def parse(dto: dict, config: dict) -> dict:
         """
-        Parses a list of amenities into a structured object with general and room amenities.
+        Parse raw JSON data using the flattened configuration.
+
+        Args:
+        - dto: The raw data from the supplier.
+        - config: The flattened configuration for the supplier.
+
+        Returns:
+        - A dictionary representing the parsed data.
         """
+        parsed_data = {}
 
-        categorized = Amenities()
-        if isinstance(amenities, list):
-            for item in amenities:
-                item_clean = item.lower().strip()
-                if any(keyword in item_clean for keyword in GENERAL_AMENITIES):
-                    categorized.general.append(item_clean)
-                if any(keyword in item_clean for keyword in ROOM_AMENITIES):
-                    categorized.room.append(item_clean)
-        elif isinstance(amenities, dict):
-            for key, items in amenities.items():
-                for item in items:
-                    item_clean = item.lower().strip()
-                    if key == 'general' and any(keyword in item_clean for keyword in GENERAL_AMENITIES):
-                        categorized.general.append(item_clean)
-                    elif key == 'room' and any(keyword in item_clean for keyword in ROOM_AMENITIES):
-                        categorized.room.append(item_clean)
+        for field, rules in config.items():
+            parsed_data[field] = Parser._parse_field(dto, rules)
 
-        # Convert sets to sorted lists to ensure consistency and remove duplicates
-        categorized.general = sorted(categorized.general)
-        categorized.room = sorted(categorized.room)
-        return categorized
+        return parsed_data
 
     @staticmethod
-    def parse_generic_field(data, field_config):
+    def _parse_field(dto: dict, rules: dict):
         """
-        Parses fields from the data based on a given field configuration.
-        Handles nested fields and returns a structured object based on the config.
+        Parse a single field based on its rules.
 
         Args:
-            data (dict): The source data dictionary from which to extract values.
-            field_config (dict or str): The configuration for extracting the field.
-                This can be a simple string pointing to a direct field or a dictionary
-                describing paths to fields or transformations needed.
+        - dto: The raw data from the supplier.
+        - rules: Field rules from the configuration.
 
         Returns:
-            dict or object: The parsed data structured according to the field_config.
+        - The parsed field value.
         """
-        if isinstance(field_config, str):
-            # Direct field access
-            return data.get(field_config)
+        # Retrieve the source value using dot notation
+        value = Parser.get_nested_value(dto, rules["source"]) if rules["source"] else None
 
-        if isinstance(field_config, dict):
-            # Complex structure with potential nested fields
-            result = {}
-            for key, path in field_config.items():
-                if isinstance(path, str):
-                    # Simple path, directly accessible
-                    result[key] = Parser.get_from_path(data, path.split('.'))
-                elif isinstance(path, dict):
-                    # Nested structure or need for more complex processing
-                    result[key] = Parser.parse_generic_field(data, path)
-            return result
+        # Apply default if the value is None
+        if value is None and "default" in rules:
+            value = rules["default"]
 
-        return None
+        # Apply type transformations
+        if "type" in rules and value is not None:
+            value = Parser._transform_value(value, rules["type"])
 
-    @staticmethod   
-    def get_from_path(data, path):
+        # Handle structured fields (e.g., images with subfields)
+        if "fields" in rules and isinstance(value, list):
+            value = [
+                {sub_field: item.get(sub_source, "")
+                 for sub_field, sub_source in rules["fields"].items()}
+                for item in value
+            ]
+
+        return value
+
+    @staticmethod
+    def get_nested_value(data: dict, path: str, sep: str = ".") -> any:
         """
-        Helper function to navigate through a nested dictionary using a list of keys.
+        Retrieve a nested value from a dictionary using dot-separated keys.
 
         Args:
-            data (dict): The dictionary to navigate.
-            path (list of str): The path through the dictionary as a list of keys.
+        - data: The dictionary to retrieve the value from.
+        - path: The dot-separated path to the value.
+        - sep: The separator for nested keys (default is ".").
 
         Returns:
-            The value found at the path, or None if the path does not exist.
+        - The value at the specified path, or None if not found.
         """
-        for key in path:
-            if data and key in data:
-                data = data[key]
+        keys = path.split(sep)
+        for key in keys:
+            if isinstance(data, dict):
+                data = data.get(key)
             else:
                 return None
         return data
 
     @staticmethod
-    def parse_images(image_data, config):
-        """Parse image data from a dictionary using a configuration dictionary."""
-        images = ImageCategory()
-        for category, details in config.items():
-            image_list = []
-            if details['key'] in image_data:
-                for img in image_data[details['key']]:
-                    image_list.append(Image(
-                        link=img[details['url_field']],
-                        description=img.get(details['desc_field'], 'No description')
-                    ))
-            setattr(images, category, image_list)
-        return images
+    def _transform_value(value: any, value_type: str) -> any:
+        """
+        Transform the value to the specified type.
+
+        Args:
+        - value: The value to transform.
+        - value_type: The target type (e.g., "integer", "float", "list", etc.).
+
+        Returns:
+        - The transformed value.
+        """
+        try:
+            if value_type == "integer":
+                return int(value)
+            elif value_type == "float":
+                return float(value)
+            elif value_type == "string":
+                return str(value)
+            elif value_type == "list" and not isinstance(value, list):
+                return [value]
+        except (ValueError, TypeError):
+            return None
+        return value
+
+    @staticmethod
+    def parse_amenities(amenities_dict: dict, config: dict) -> dict:
+        """
+        Categorize amenities into 'general' and 'room', using a set for matching.
+
+        Args:
+        - amenities_dict: A dictionary containing 'general' and 'room' amenities.
+        - config: Configuration defining 'general' and 'room' amenities.
+
+        Returns:
+        - A dictionary with categorized amenities.
+        """
+        categorized_amenities = {"general": [], "room": []}
+
+        # Combine all amenities from input
+        amenities = amenities_dict.get("general", []) + amenities_dict.get("room", [])
+
+        # Create sets for normalized general and room amenities
+        general_set = {g.replace(" ", "").lower() for g in config["general"]}
+        room_set = {r.replace(" ", "").lower() for r in config["room"]}
+
+        for amenity in amenities:
+            # Normalize the amenity (remove spaces, lowercase)
+            normalized = amenity.replace(" ", "").lower()
+
+            if normalized in general_set:
+                # Use the readable version from config
+                readable = next(g for g in config["general"] if g.replace(" ", "").lower() == normalized)
+                categorized_amenities["general"].append(readable)
+            elif normalized in room_set:
+                # Use the readable version from config
+                readable = next(r for r in config["room"] if r.replace(" ", "").lower() == normalized)
+                categorized_amenities["room"].append(readable)
+            else:
+                # Default to general category
+                categorized_amenities["general"].append(amenity)
+
+        return categorized_amenities
+

@@ -1,45 +1,58 @@
 import requests
 from abc import ABC, abstractmethod
-from config.config import SUPPLIER_CONFIG
+from config.config import SUPPLIER_CONFIG, AMENITIES_CONFIG
 from .parser import *
 from typing import List
 from ..models.hotel import Hotel
 
 class BaseSupplier(ABC):
-    supplier_key = None  # Set in subclass
+    supplier_key = None  # Subclass must define this
 
     def endpoint(self) -> str:
-        """Return the endpoint URL from configuration."""
-        return SUPPLIER_CONFIG[self.supplier_key]['endpoint']
+        """Return the supplier's endpoint from the config."""
+        return SUPPLIER_CONFIG[self.supplier_key]["endpoint"]
 
     def fetch(self) -> List[Hotel]:
-        """Fetch data from the endpoint and parse it."""
+        """Fetch data from the supplier's endpoint and parse it."""
         response = requests.get(self.endpoint())
-        response.raise_for_status()  # Handle possible HTTP errors
-        return [self.parse(dto) for dto in response.json()]
+        response.raise_for_status()
+        raw_data = response.json()
+        return [self.parse(dto) for dto in raw_data]
 
     def parse(self, dto) -> Hotel:
-        """Generic parse method using configurations."""
-        config = SUPPLIER_CONFIG[self.supplier_key]['fields']
-        
-        # Parse location and amenities using helper functions
-        location = Parser.parse_generic_field(dto, config['location'])
-        amenities = Parser.parse_amenities(dto.get(config['amenities'], {}))
+        """Parse a single data object using the supplier's configuration."""
+        config = SUPPLIER_CONFIG[self.supplier_key]["fields"]
 
-        # Handle images, checking for existence in DTO
-        image_data = dto.get('images', {})
-        images = Parser.parse_images(image_data, config['images'])
+        # Parse fields using the Parser
+        parsed_data = Parser.parse(dto, config)
 
-        # Safely handle and strip description or use an empty string if None
-        description = (dto.get(config['description']) or '').strip()
+        # Group nested fields dynamically
+        grouped_data = self._group_nested_fields(parsed_data)
 
-        return Hotel(
-            id=dto[config['id']],
-            destination_id=int(dto[config['destination_id']]),
-            name=dto[config['name']],
-            description=description,
-            location=location,
-            amenities=amenities,
-            images=images,
-            booking_conditions=dto.get('booking_conditions', [])
-        )
+        # Parse amenities
+        grouped_data["amenities"] = Parser.parse_amenities(grouped_data["amenities"], AMENITIES_CONFIG)
+
+        # Create and return the Hotel object
+        return Hotel(**grouped_data)
+
+    def _group_nested_fields(self, flat_data: dict, sep: str = ".") -> dict:
+        """
+        Convert flattened keys into nested dictionaries.
+
+        Args:
+        - flat_data: A dictionary with flattened keys (e.g., "location.lat").
+        - sep: The separator used in flattened keys (default is ".").
+
+        Returns:
+        - A nested dictionary.
+        """
+        nested_data = {}
+        for key, value in flat_data.items():
+            keys = key.split(sep)
+            d = nested_data
+            for part in keys[:-1]:
+                d = d.setdefault(part, {})
+            d[keys[-1]] = value
+        return nested_data
+
+

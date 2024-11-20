@@ -1,80 +1,128 @@
-from typing import List, Dict
+import json
+from typing import List, Dict, Any
 from ..models.hotel import Hotel, Image, Amenities
 
+
 class DataMerger:
+    def __init__(self, config_path: str = "config/merge_strategy.json"):
+        # Load merge strategies from the configuration file
+        with open(config_path, "r") as file:
+            self.merge_strategy = json.load(file)["fields"]
+
     def merge_hotels(self, hotel_data: List[Hotel]) -> List[Hotel]:
-        """Consolidate hotel data from multiple sources into the most comprehensive entries possible."""
+        """Merge hotel data from multiple sources into comprehensive entries."""
         merged_hotels = {}
         for hotel in hotel_data:
             if hotel.id not in merged_hotels:
                 merged_hotels[hotel.id] = hotel
             else:
-                merged_hotels[hotel.id] = self.merge_two_hotels(merged_hotels[hotel.id], hotel)
+                merged_hotels[hotel.id] = self._merge_two_hotels(merged_hotels[hotel.id], hotel)
         return list(merged_hotels.values())
 
-    def merge_two_hotels(self, existing: Hotel, new: Hotel) -> Hotel:
-        """Merge two hotel records into a single, more comprehensive record."""
-        # Use a comprehensive method to merge each field thoughtfully.
-
-        existing.name = self.get_preferable_value(existing.name, new.name)
-        existing.description = self.concatenate_descriptions(existing.description, new.description)
-        existing.location = self.merge_locations(existing.location, new.location)
-        existing.amenities = self.merge_amenities(existing.amenities, new.amenities)
-        existing.images.rooms = self.merge_images(existing.images.rooms, new.images.rooms)
-        existing.images.site = self.merge_images(existing.images.site, new.images.site)
-        existing.images.amenities = self.merge_images(existing.images.amenities, new.images.amenities)
-        existing.booking_conditions = self.merge_lists_unique(existing.booking_conditions, new.booking_conditions)
+    def _merge_two_hotels(self, existing: Hotel, new: Hotel) -> Hotel:
+        """Merge two hotel records based on defined strategies."""
+        for field, strategy_config in self.merge_strategy.items():
+            strategy = strategy_config.get("strategy", "default_merge")
+            merge_function = getattr(self, strategy, self._default_merge)
+            key = strategy_config.get("key", None)
+            subfield_strategies = strategy_config.get("subfield_strategies", {})
+            # Retrieve existing and new field values
+            existing_value = self._get_nested_field(existing, field)
+            new_value = self._get_nested_field(new, field)
+            # Merge the values
+            merged_value = merge_function(existing_value, new_value, key, subfield_strategies)
+            self._set_nested_field(existing, field, merged_value)
         return existing
 
-    def get_preferable_value(self, val1, val2):
-        """Return the more preferable of two values, handling different data types appropriately."""
+    # ===============================
+    # Merge Strategies
+    # ===============================
+
+    def _default_merge(self, val1, val2, *args, **kwargs):
+        """Default merge strategy: choose the first non-null value."""
+        return val1 if val1 is not None else val2
+    
+    def first_non_null(self, val1, val2, *args, **kwargs):
+        """Choose the first non-null value."""
+        return val1 if val1 is not None else val2
+
+    def choose_best(self, val1, val2, *args, **kwargs):
+        """Choose the better value based on predefined criteria."""
         if isinstance(val1, str) and isinstance(val2, str):
-            # Prefer the longer string, or either if lengths are equal
             return val1 if len(val1) >= len(val2) else val2
-        elif isinstance(val1, (int, float)) and isinstance(val2, (int, float)):
-            # For numerical values, prefer the larger one
-            return val1 if val1 >= val2 else val2
-        else:
-            # Return the first non-None value
-            return val1 if val1 is not None else val2
+        if isinstance(val1, (int, float)) and isinstance(val2, (int, float)):
+            return max(val1, val2)
+        return val1 if val1 is not None else val2
 
-    def concatenate_descriptions(self, desc1, desc2):
-        """Concatenate two descriptions, ensuring they are separated by a newline if both are non-empty."""
-        if not desc1.strip():
-            return desc2.strip()
-        if not desc2.strip():
-            return desc1.strip()
-        return f"{desc1.strip()} {desc2.strip()}"
+    def concatenate(self, val1, val2, *args, **kwargs):
+        """Concatenate two strings if they are different."""
+        if not val1:
+            return val2
+        if not val2:
+            return val1
+        val1, val2 = val1.strip(), val2.strip()
+        if val2 in val1:
+            return val1
+        if val1 in val2:
+            return val2
+        return f"{val1} {val2}"
 
-    def merge_locations(self, loc1, loc2):
-        """Merge two location dictionaries, preferring non-null and more detailed attributes."""
-        merged_location = {}
-        attributes = ['address', 'city', 'country', 'lat', 'lng', 'postal_code']
-        for attribute in attributes:
-            # Use a helper function or direct comparison to choose the best value
-            value1 = loc1.get(attribute, '')
-            value2 = loc2.get(attribute, '')
-            merged_location[attribute] = self.get_preferable_value(value1, value2)
-        return merged_location
+    def merge_list(self, list1: List[Any], list2: List[Any], key: str = None, subfield_strategies: Dict[str, str] = None):
+        """Merge two lists, deduplicating by a key and applying subfield strategies."""
+        if not list1:
+            return list2 or []
+        if not list2:
+            return list1 or []
 
-    def merge_amenities(self, amenities1: Amenities, amenities2: Amenities) -> Amenities:
-        """Merge two Amenities instances, combining and deduplicating their lists."""
+        if key:  # Deduplicate based on a key field
+            combined = {}
+            for item in list1 + list2:
+                item_key = item.get(key) if isinstance(item, dict) else item
+                if item_key in combined:
+                    # Merge subfields if applicable
+                    for subfield, strategy in (subfield_strategies or {}).items():
+                        existing_value = combined[item_key].get(subfield, "")
+                        new_value = item.get(subfield, "")
+                        combined[item_key][subfield] = self._apply_strategy(existing_value, new_value, strategy)
+                else:
+                    combined[item_key] = item
+            return list(combined.values())
 
-        combined_general = list(set(amenities1.general + amenities2.general))
-        combined_room = list(set(amenities1.room + amenities2.room))
-        return Amenities(general=combined_general, room=combined_room)
-
-    def merge_lists_unique(self, list1: List, list2: List) -> List:
-        """Merge two lists, removing duplicate entries."""
+        # Default behavior for non-dictionary lists
         return list(set(list1 + list2))
 
-    def merge_images(self, images1: List[Image], images2: List[Image]) -> List[Image]:
-        """Merge two lists of images, removing duplicates based on image link."""
-        unique_links = set()
-        merged_images = []
-        for image in images1 + images2:
-            if image.link not in unique_links:
-                unique_links.add(image.link)
-                merged_images.append(image)
-        return merged_images
+    # ===============================
+    # Helper Methods
+    # ===============================
 
+    def _apply_strategy(self, val1: Any, val2: Any, strategy: str) -> Any:
+        """Apply a strategy dynamically to two values."""
+        strategy_function = getattr(self, strategy, self._default_merge)
+        return strategy_function(val1, val2)
+
+    def _get_nested_field(self, obj: Any, field: str) -> Any:
+        """Retrieve the value of a nested field using dot notation."""
+        keys = field.split(".")
+        for key in keys:
+            if isinstance(obj, dict):
+                obj = obj.get(key)
+            elif hasattr(obj, key):
+                obj = getattr(obj, key)
+            else:
+                return None
+        return obj
+
+    def _set_nested_field(self, obj: Any, field: str, value: Any):
+        """Set the value of a nested field using dot notation."""
+        keys = field.split(".")
+        for key in keys[:-1]:
+            if isinstance(obj, dict):
+                obj = obj.setdefault(key, {})
+            elif hasattr(obj, key):
+                obj = getattr(obj, key)
+            else:
+                return
+        if isinstance(obj, dict):
+            obj[keys[-1]] = value
+        elif hasattr(obj, keys[-1]):
+            setattr(obj, keys[-1], value)
