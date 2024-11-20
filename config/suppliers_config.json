@@ -1,0 +1,71 @@
+{
+  "acme": {
+    "endpoint": "https://5f2be0b4ffc88500167b85a0.mockapi.io/suppliers/acme",
+    "fields": {
+      "id": "Id",
+      "destination_id": "DestinationId",
+      "name": "Name",
+      "description": "Description",
+      "location": {
+        "address": "Address",
+        "city": "City",
+        "country": "Country",
+        "lat": "Latitude",
+        "lng": "Longitude",
+        "postal_code": "PostalCode"
+      },
+      "amenities": "Facilities",
+      "images": {}
+    }
+  },
+  "patagonia": {
+    "endpoint": "https://5f2be0b4ffc88500167b85a0.mockapi.io/suppliers/patagonia",
+    "fields": {
+      "id": "id",
+      "destination_id": "destination",
+      "name": "name",
+      "description": "info",
+      "location": {
+        "address": "address",
+        "lat": "lat",
+        "lng": "lng"
+      },
+      "amenities": "amenities",
+      "images": {
+        "rooms": {
+          "key": "rooms",
+          "url_field": "url",
+          "desc_field": "description"
+        },
+        "amenities": {
+          "key": "amenities",
+          "url_field": "url",
+          "desc_field": "description"
+        }
+      }
+    }
+  },
+  "paperflies": {
+    "endpoint": "https://5f2be0b4ffc88500167b85a0.mockapi.io/suppliers/paperflies",
+    "fields": {
+      "id": "hotel_id",
+      "destination_id": "destination_id",
+      "name": "hotel_name",
+      "description": "details",
+      "location": {
+        "address": "location.address",
+        "city": "location.city",
+        "country": "location.country"
+      },
+      "amenities": "amenities",
+      "images": {
+        "rooms": {
+          "key": "rooms",
+          "url_field": "link",
+          "desc_field": "caption"
+        },
+        "site": { "key": "site", "url_field": "link", "desc_field": "caption" }
+      }
+    }
+  }
+}

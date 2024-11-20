@@ -1,0 +1,138 @@
+[
+  {
+    "id": "iJhz",
+    "destination_id": 5432,
+    "name": "Beach Villas Singapore",
+    "description": "This 5 star hotel is located on the coastline of Singapore. Located at the western tip of Resorts World Sentosa, guests at the Beach Villas are guaranteed privacy while they enjoy spectacular views of glittering waters. Guests will find themselves in paradise with this series of exquisite tropical sanctuaries, making it the perfect setting for an idyllic retreat. Within each villa, guests will discover living areas and bedrooms that open out to mini gardens, private timber sundecks and verandahs elegantly framing either lush greenery or an expanse of sea. Guests are assured of a superior slumber with goose feather pillows and luxe mattresses paired with 400 thread count Egyptian cotton bed linen, tastefully paired with a full complement of luxurious in-room amenities and bathrooms boasting rain showers and free-standing tubs coupled with an exclusive array of ESPA amenities and toiletries. Guests also get to enjoy complimentary day access to the facilities at Asia\u2019s flagship spa \u2013 the world-renowned ESPA. Surrounded by tropical gardens, these upscale villas in elegant Colonial-style buildings are part of the Resorts World Sentosa complex and a 2-minute walk from the Waterfront train station. Featuring sundecks and pool, garden or sea views, the plush 1- to 3-bedroom villas offer free Wi-Fi and flat-screens, as well as free-standing baths, minibars, and tea and coffeemaking facilities. Upgraded villas add private pools, fridges and microwaves; some have wine cellars. A 4-bedroom unit offers a kitchen and a living room. There's 24-hour room and butler service. Amenities include posh restaurant, plus an outdoor pool, a hot tub, and free parking.",
+    "location": {
+      "address": "8 Sentosa Gateway, Beach Villas, 098269",
+      "city": "Singapore",
+      "country": "Singapore",
+      "lat": 1.264751,
+      "lng": 103.824006,
+      "postal_code": "098269"
+    },
+    "amenities": {
+      "general": [
+        "indoor pool",
+        "childcare",
+        "business center",
+        "pool",
+        "wifi",
+        "outdoor pool",
+        "breakfast"
+      ],
+      "room": [
+        "tv",
+        "coffee machine",
+        "tub",
+        "kettle",
+        "hair dryer",
+        "aircon",
+        "iron"
+      ]
+    },
+    "images": {
+      "rooms": [
+        {
+          "link": "https://d2ey9sqrvkqdfs.cloudfront.net/0qZF/2.jpg",
+          "description": "Double room"
+        },
+        {
+          "link": "https://d2ey9sqrvkqdfs.cloudfront.net/0qZF/4.jpg",
+          "description": "Bathroom"
+        },
+        {
+          "link": "https://d2ey9sqrvkqdfs.cloudfront.net/0qZF/3.jpg",
+          "description": "Double room"
+        }
+      ],
+      "site": [
+        {
+          "link": "https://d2ey9sqrvkqdfs.cloudfront.net/0qZF/1.jpg",
+          "description": "Front"
+        }
+      ],
+      "amenities": [
+        {
+          "link": "https://d2ey9sqrvkqdfs.cloudfront.net/0qZF/0.jpg",
+          "description": "RWS"
+        },
+        {
+          "link": "https://d2ey9sqrvkqdfs.cloudfront.net/0qZF/6.jpg",
+          "description": "Sentosa Gateway"
+        }
+      ]
+    },
+    "booking_conditions": [
+      "Guests are required to show a photo identification and credit card upon check-in. Please note that all Special Requests are subject to availability and additional charges may apply. Payment before arrival via bank transfer is required. The property will contact you after you book to provide instructions. Please note that the full amount of the reservation is due before arrival. Resorts World Sentosa will send a confirmation with detailed payment information. After full payment is taken, the property's details, including the address and where to collect keys, will be emailed to you. Bag checks will be conducted prior to entry to Adventure Cove Waterpark. === Upon check-in, guests will be provided with complimentary Sentosa Pass (monorail) to enjoy unlimited transportation between Sentosa Island and Harbour Front (VivoCity). === Prepayment for non refundable bookings will be charged by RWS Call Centre. === All guests can enjoy complimentary parking during their stay, limited to one exit from the hotel per day. === Room reservation charges will be charged upon check-in. Credit card provided upon reservation is for guarantee purpose. === For reservations made with inclusive breakfast, please note that breakfast is applicable only for number of adults paid in the room rate. Any children or additional adults are charged separately for breakfast and are to paid directly to the hotel.",
+      "WiFi is available in all areas and is free of charge.",
+      "Pets are not allowed.",
+      "All children are welcome. One child under 12 years stays free of charge when using existing beds. One child under 2 years stays free of charge in a child's cot/crib. One child under 4 years stays free of charge when using existing beds. One older child or adult is charged SGD 82.39 per person per night in an extra bed. The maximum number of children's cots/cribs in a room is 1. There is no capacity for extra beds in the room.",
+      "Free private parking is possible on site (reservation is not needed)."
+    ]
+  },
+  {
+    "id": "SjyX",
+    "destination_id": 5432,
+    "name": "InterContinental Singapore Robertson Quay",
+    "description": "Enjoy sophisticated waterfront living at the new InterContinental\u00ae Singapore Robertson Quay, luxury's preferred address nestled in the heart of Robertson Quay along the Singapore River, with the CBD just five minutes drive away. Magnifying the comforts of home, each of our 225 studios and suites features a host of thoughtful amenities that combine modernity with elegance, whilst maintaining functional practicality. The hotel also features a chic, luxurious Club InterContinental Lounge. InterContinental Singapore Robertson Quay is luxury's preferred address offering stylishly cosmopolitan riverside living for discerning travelers to Singapore. Prominently situated along the Singapore River, the 225-room inspiring luxury hotel is easily accessible to the Marina Bay Financial District, Central Business District, Orchard Road and Singapore Changi International Airport, all located a short drive away. The hotel features the latest in Club InterContinental design and service experience, and five dining options including Publico, an Italian landmark dining and entertainment destination by the waterfront.",
+    "location": {
+      "address": "1 Nanson Rd, Singapore 238909",
+      "city": "Singapore",
+      "country": "Singapore",
+      "lat": "",
+      "lng": "",
+      "postal_code": "238909"
+    },
+    "amenities": {
+      "general": [
+        "childcare",
+        "dry cleaning",
+        "business center",
+        "pool",
+        "wifi",
+        "outdoor pool",
+        "breakfast"
+      ],
+      "room": [
+        "tv",
+        "bathtub",
+        "hair dryer",
+        "aircon"
+      ]
+    },
+    "images": {
+      "rooms": [
+        {
+          "link": "https://d2ey9sqrvkqdfs.cloudfront.net/Sjym/i93_m.jpg",
+          "description": "Double room"
+        },
+        {
+          "link": "https://d2ey9sqrvkqdfs.cloudfront.net/Sjym/i94_m.jpg",
+          "description": "Bathroom"
+        }
+      ],
+      "site": [
+        {
+          "link": "https://d2ey9sqrvkqdfs.cloudfront.net/Sjym/i1_m.jpg",
+          "description": "Restaurant"
+        },
+        {
+          "link": "https://d2ey9sqrvkqdfs.cloudfront.net/Sjym/i2_m.jpg",
+          "description": "Hotel Exterior"
+        },
+        {
+          "link": "https://d2ey9sqrvkqdfs.cloudfront.net/Sjym/i5_m.jpg",
+          "description": "Entrance"
+        },
+        {
+          "link": "https://d2ey9sqrvkqdfs.cloudfront.net/Sjym/i24_m.jpg",
+          "description": "Bar"
+        }
+      ],
+      "amenities": []
+    },
+    "booking_conditions": []
+  }
+]

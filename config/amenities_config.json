@@ -1,0 +1,22 @@
+{
+  "general": [
+    "pool",
+    "business center",
+    "wifi",
+    "dry cleaning",
+    "breakfast",
+    "childcare",
+    "outdoor pool",
+    "indoor pool"
+  ],
+  "room": [
+    "tv",
+    "coffee machine",
+    "kettle",
+    "hair dryer",
+    "iron",
+    "bathtub",
+    "aircon",
+    "tub"
+  ]
+}
